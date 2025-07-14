@@ -4,6 +4,28 @@ const galeriaItemsRaw = [
   {
     id: 1,
     tipo: 'video',
+    tipoVideo: 'youtube',
+    titulo: 'Release - Banda Plano Marshall',
+    descricao: 'Snippets - Jaú/SP',
+    thumbnail: '/logo-fundo.webp',
+    videoId: 'r2LSqrzxFG8',
+    objectPosition: 'object-center',
+    url: '#'
+  },
+  {
+    id: 2,
+    tipo: 'video',
+    tipoVideo: 'local',
+    titulo: 'Aftermovie - Jimi\'s Bar',
+    descricao: '22/06/2025 - Jaú/SP',
+    thumbnail: '/banda2.webp',
+    videoSrc: '/banda-video2.mp4',
+    objectPosition: 'object-center',
+    url: '#'
+  },
+  {
+    id: 3,
+    tipo: 'video',
     tipoVideo: 'local',
     titulo: 'Aftermovie - Casarão 682',
     descricao: '31/05/2025 - Jaú/SP',
@@ -13,7 +35,7 @@ const galeriaItemsRaw = [
     url: '#'
   },
   {
-    id: 2,
+    id: 4,
     tipo: 'foto',
     titulo: 'Casarão 682',
     descricao: '31/05/2025 - Jaú/SP',
@@ -22,7 +44,7 @@ const galeriaItemsRaw = [
     url: '#'
   },
   {
-    id: 3,
+    id: 5,
     tipo: 'foto',
     titulo: 'Casarão 682',
     descricao: '31/05/2025 - Jaú/SP', 
@@ -31,7 +53,7 @@ const galeriaItemsRaw = [
     url: '#'
   },
   {
-    id: 4,
+    id: 6,
     tipo: 'foto',
     titulo: 'Casarão 682',
     descricao: '31/05/2025 - Jaú/SP',
@@ -40,7 +62,7 @@ const galeriaItemsRaw = [
     url: '#'
   },
   {
-    id: 5,
+    id: 7,
     tipo: 'foto',
     titulo: 'Casarão 682',
     descricao: '31/05/2025 - Jaú/SP',
@@ -49,7 +71,7 @@ const galeriaItemsRaw = [
     url: '#'
   },
   {
-    id: 6,
+    id: 8,
     tipo: 'foto',
     titulo: 'Casarão 682',
     descricao: '31/05/2025 - Jaú/SP',
@@ -58,7 +80,7 @@ const galeriaItemsRaw = [
     url: '#'
   },
   {
-    id: 7,
+    id: 9,
     tipo: 'foto',
     titulo: 'Casarão 682',
     descricao: '31/05/2025 - Jaú/SP',
@@ -67,7 +89,7 @@ const galeriaItemsRaw = [
     url: '#'
   },
   {
-    id: 8,
+    id: 10,
     tipo: 'foto',
     titulo: 'Casarão 682',
     descricao: '31/05/2025 - Jaú/SP',
@@ -118,7 +140,7 @@ const galeriaItems = galeriaItemsRaw.sort((a, b) => a.id - b.id);
           class={`galeria-item group cursor-pointer transition-all duration-300 ${item.tipo}`}
           data-tipo={item.tipo}
           data-tipo-video={item.tipoVideo || ''}
-          data-video-src={item.videoSrc || ''}
+          data-video-src={'videoSrc' in item ? item.videoSrc || '' : ''}
           data-video-id={'videoId' in item ? item.videoId || '' : ''}
           data-titulo={item.titulo}
           data-descricao={item.descricao}
@@ -191,7 +213,7 @@ const galeriaItems = galeriaItemsRaw.sort((a, b) => a.id - b.id);
               class={`galeria-item-mobile min-w-full px-4 cursor-pointer ${item.tipo}`}
               data-tipo={item.tipo}
               data-tipo-video={item.tipoVideo || ''}
-              data-video-src={item.videoSrc || ''}
+              data-video-src={'videoSrc' in item ? item.videoSrc || '' : ''}
               data-video-id={'videoId' in item ? item.videoId || '' : ''}
               data-titulo={item.titulo}
               data-descricao={item.descricao}
@@ -354,7 +376,7 @@ const galeriaItems = galeriaItemsRaw.sort((a, b) => a.id - b.id);
     const verGaleriaBtn = document.getElementById('ver-galeria-btn');
     
     let currentSlide = 0;
-    let totalSlides = 8; // Exatamente 8 itens ordenados por ID
+    let totalSlides = 10; // Exatamente 10 itens ordenados por ID
 
     // Verificar se os elementos existem
     if (!modal || !modalContent || !modalClose || !carousel || !dots.length) {
@@ -364,9 +386,9 @@ const galeriaItems = galeriaItemsRaw.sort((a, b) => a.id - b.id);
 
     console.log(`✅ Galeria inicializada: ${totalSlides} slides, ${dots.length} bolinhas da galeria`);
     
-    // Debug: verificar se temos exatamente 8 bolinhas da galeria
-    if (dots.length !== 8) {
-      console.warn(`⚠️ Esperado 8 bolinhas da galeria, encontrado ${dots.length}`);
+    // Debug: verificar se temos exatamente 10 bolinhas da galeria
+    if (dots.length !== 10) {
+      console.warn(`⚠️ Esperado 10 bolinhas da galeria, encontrado ${dots.length}`);
     }
     
     // Usar todas as bolinhas (devem ser exatamente 8)
