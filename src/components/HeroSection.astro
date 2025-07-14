@@ -15,9 +15,21 @@
       muted
       loop
       playsinline
-      preload="metadata"
-      poster="thumbnail.webp"
+      preload="auto"
+      poster="/banda.webp"
+      webkit-playsinline="true"
+      x-webkit-airplay="allow"
+      controls={false}
     ></video>
+    
+    <!-- Botão de play para iOS quando necessário -->
+    <div id="video-play-button" class="md:hidden absolute inset-0 z-30 flex items-center justify-center bg-black/40 hidden">
+      <button class="bg-[#b9963d] hover:bg-[#caa342] text-black rounded-full p-4 transition-colors">
+        <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M8 5v14l11-7z"/>
+        </svg>
+      </button>
+    </div>
     
     <!-- Imagem para desktop -->
     <img
@@ -89,20 +101,90 @@
   document.addEventListener('DOMContentLoaded', function() {
     const header = document.getElementById('header') as HTMLElement | null;
     const heroVideo = document.getElementById('hero-video') as HTMLVideoElement | null;
+    const videoPlayButton = document.getElementById('video-play-button') as HTMLElement | null;
     
     // Configurar vídeo para começar no segundo 1.5
     if (heroVideo) {
-      heroVideo.addEventListener('loadedmetadata', function() {
+      // Função para inicializar vídeo
+      function initVideo() {
         heroVideo.currentTime = 1.0;
-      });
+        
+        // Tentar reproduzir automaticamente
+        const playPromise = heroVideo.play();
+        
+        if (playPromise !== undefined) {
+          playPromise.then(() => {
+            // Vídeo reproduzindo com sucesso
+            if (videoPlayButton) {
+              videoPlayButton.classList.add('hidden');
+            }
+          }).catch(error => {
+            // Autoplay falhou, mostrar botão de play
+            console.log('Autoplay bloqueado, mostrando botão de play');
+            if (videoPlayButton) {
+              videoPlayButton.classList.remove('hidden');
+            }
+          });
+        }
+      }
+
+      heroVideo.addEventListener('loadedmetadata', initVideo);
       
-      // Garantir que o vídeo volte para 1.5s quando reiniciar o loop
+      // Garantir que o vídeo volte para 1.0s quando reiniciar o loop
       heroVideo.addEventListener('ended', function() {
         heroVideo.currentTime = 1.0;
         heroVideo.play();
       });
+
+      // Detectar iOS e problemas de autoplay
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+      
+      // Tentar reproduzir automaticamente
+      const playPromise = heroVideo.play();
+      
+      if (playPromise !== undefined) {
+        playPromise.catch(error => {
+          // Autoplay falhou, mostrar botão de play
+          if (videoPlayButton) {
+            videoPlayButton.classList.remove('hidden');
+          }
+        });
+      }
+
+      // Adicionar evento de clique no botão de play
+      if (videoPlayButton) {
+        const playButton = videoPlayButton.querySelector('button');
+        if (playButton) {
+          playButton.addEventListener('click', function() {
+            heroVideo.play().then(() => {
+              videoPlayButton.classList.add('hidden');
+            }).catch(error => {
+              console.log('Erro ao reproduzir vídeo:', error);
+            });
+          });
+        }
+      }
+
+      // Para iOS, adicionar evento de toque na tela para iniciar reprodução
+      if (isIOS) {
+        // Mostrar botão após 2 segundos se vídeo não estiver reproduzindo
+        setTimeout(() => {
+          if (heroVideo.paused && videoPlayButton) {
+            videoPlayButton.classList.remove('hidden');
+          }
+        }, 2000);
+
+        document.addEventListener('touchstart', function initVideoOnTouch() {
+          heroVideo.play().then(() => {
+            if (videoPlayButton) {
+              videoPlayButton.classList.add('hidden');
+            }
+          });
+          document.removeEventListener('touchstart', initVideoOnTouch);
+        }, { once: true });
+      }
     }
-    
+
     // Função para scroll suave com compensação do header
     function smoothScrollTo(targetId: string) {
       const targetElement = document.getElementById(targetId);
