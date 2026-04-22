@@ -96,6 +96,42 @@ const galeriaItemsRaw = [
     imagem: '/galeria/fotos/casarao7.webp',
     objectPosition: 'object-center',
     url: '#'
+  },
+  {
+    id: 11,
+    tipo: 'foto',
+    titulo: 'Plano Marshall',
+    descricao: 'Jaú/SP',
+    imagem: '/galeria/fotos/WhatsApp Image 2026-04-21 at 22.43.11.webp',
+    objectPosition: 'object-center',
+    url: '#'
+  },
+  {
+    id: 12,
+    tipo: 'foto',
+    titulo: 'Plano Marshall',
+    descricao: 'Jaú/SP',
+    imagem: '/galeria/fotos/WhatsApp Image 2026-04-21 at 22.43.12 (1).webp',
+    objectPosition: 'object-center',
+    url: '#'
+  },
+  {
+    id: 13,
+    tipo: 'foto',
+    titulo: 'Plano Marshall',
+    descricao: 'Jaú/SP',
+    imagem: '/galeria/fotos/WhatsApp Image 2026-04-21 at 22.43.12.webp',
+    objectPosition: 'object-center',
+    url: '#'
+  },
+  {
+    id: 14,
+    tipo: 'foto',
+    titulo: 'Plano Marshall',
+    descricao: 'Jaú/SP',
+    imagem: '/galeria/fotos/WhatsApp Image 2026-04-21 at 22.43.50.webp',
+    objectPosition: 'object-center',
+    url: '#'
   }
 ];
 
@@ -134,7 +170,7 @@ const galeriaItems = galeriaItemsRaw.sort((a, b) => a.id - b.id);
     </div>
 
     <!-- Desktop/Tablet Grid -->
-    <div class="hidden md:grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" id="galeria-grid-desktop">
+    <div class="hidden sm:grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" id="galeria-grid-desktop">
       {galeriaItems.map((item) => (
         <div 
           class={`galeria-item group cursor-pointer transition-all duration-300 ${item.tipo}`}
@@ -205,7 +241,7 @@ const galeriaItems = galeriaItemsRaw.sort((a, b) => a.id - b.id);
     </div>
 
     <!-- Mobile Carrossel -->
-    <div class="md:hidden relative">
+    <div class="sm:hidden relative">
       <div class="overflow-hidden">
         <div id="galeria-carousel" class="flex transition-transform duration-300 ease-in-out">
           {galeriaItems.map((item, index) => (
@@ -294,15 +330,15 @@ const galeriaItems = galeriaItemsRaw.sort((a, b) => a.id - b.id);
       </div>
     </div>
 
-    <!-- Botão Ver Mais -->
-    <div class="mt-12 text-center">
+    <!-- Botão Carregar Mais (apenas grid) -->
+    <div class="mt-12 text-center hidden sm:block">
       <button 
-        id="ver-galeria-btn"
+        id="carregar-mais-btn"
         class="inline-flex items-center gap-2 px-6 py-3 border-2 border-[#b9963d] text-[#b9963d] hover:bg-[#b9963d] hover:text-black font-bebas uppercase tracking-wider transition-all duration-300 rounded-md group cursor-pointer"
       >
-        Ver galeria completa
-        <svg class="h-4 w-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+        Carregar mais
+        <svg class="h-4 w-4 group-hover:translate-y-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
         </svg>
       </button>
     </div>
@@ -373,10 +409,15 @@ const galeriaItems = galeriaItemsRaw.sort((a, b) => a.id - b.id);
     const modal = document.getElementById('modal');
     const modalContent = document.getElementById('modal-content');
     const modalClose = document.getElementById('modal-close');
-    const verGaleriaBtn = document.getElementById('ver-galeria-btn');
+    const carregarMaisBtn = document.getElementById('carregar-mais-btn');
     
     let currentSlide = 0;
-    let totalSlides = 10; // Exatamente 10 itens ordenados por ID
+    let totalSlides = galeriaItemsMobile.length; // Recalculado pelos filtros/limites
+    const DESKTOP_STEP = 8;
+    const MOBILE_STEP = 6;
+    let desktopVisibleLimit = DESKTOP_STEP;
+    let mobileVisibleLimit = MOBILE_STEP;
+    let currentFilter = 'todos';
 
     // Verificar se os elementos existem
     if (!modal || !modalContent || !modalClose || !carousel || !dots.length) {
@@ -386,22 +427,71 @@ const galeriaItems = galeriaItemsRaw.sort((a, b) => a.id - b.id);
 
     console.log(`✅ Galeria inicializada: ${totalSlides} slides, ${dots.length} bolinhas da galeria`);
     
-    // Debug: verificar se temos exatamente 10 bolinhas da galeria
-    if (dots.length !== 10) {
-      console.warn(`⚠️ Esperado 10 bolinhas da galeria, encontrado ${dots.length}`);
+    // Debug: verificar se temos exatamente 14 bolinhas da galeria
+    if (dots.length !== 14) {
+      console.warn(`⚠️ Esperado 14 bolinhas da galeria, encontrado ${dots.length}`);
     }
     
     // Usar todas as bolinhas (devem ser exatamente 8)
     const validDots = Array.from(dots);
     
-    // Função para atualizar itens e bolinhas visíveis baseado no filtro
+    function countDesktopVisibleItems() {
+      return Array.from(galeriaItemsDesktop).filter((el) => !el.classList.contains('hidden')).length;
+    }
+
+    function updateCarregarMaisButton() {
+      if (!carregarMaisBtn) return;
+      const visibleDesktop = countDesktopVisibleItems();
+      const totalInFilter = Array.from(galeriaItemsDesktop).filter((el) => {
+        const itemTipo = el.getAttribute('data-tipo');
+        return currentFilter === 'todos' || currentFilter === itemTipo;
+      }).length;
+
+      if (visibleDesktop >= totalInFilter) {
+        carregarMaisBtn.classList.add('hidden');
+      } else {
+        carregarMaisBtn.classList.remove('hidden');
+      }
+    }
+
+    function applyLimitToDesktop(filter = 'todos') {
+      let shown = 0;
+      galeriaItemsDesktop.forEach((item) => {
+        const itemTipo = item.getAttribute('data-tipo');
+        const inFilter = filter === 'todos' || filter === itemTipo;
+        if (!inFilter) {
+          item.classList.add('hidden');
+          return;
+        }
+        if (shown < desktopVisibleLimit) {
+          item.classList.remove('hidden');
+          shown++;
+        } else {
+          item.classList.add('hidden');
+        }
+      });
+    }
+
+    function getTotalMobileItemsInFilter(filter = 'todos') {
+      let total = 0;
+      galeriaItemsMobile.forEach((item) => {
+        const itemTipo = item.getAttribute('data-tipo');
+        const inFilter = filter === 'todos' || filter === itemTipo;
+        if (inFilter) total++;
+      });
+      return total;
+    }
+
+    // Função para atualizar itens e bolinhas visíveis no MOBILE (carrega por demanda)
     function updateVisibleItems(filter = 'todos') {
       let visibleItems = [];
       let visibleIndex = 0;
+      let shown = 0;
       
       galeriaItemsMobile.forEach((item, originalIndex) => {
         const itemTipo = item.getAttribute('data-tipo');
-        const isVisible = filter === 'todos' || filter === itemTipo;
+        const inFilter = filter === 'todos' || filter === itemTipo;
+        const isVisible = inFilter && shown < mobileVisibleLimit;
         
         if (isVisible) {
           // Item visível - remover hidden e resetar transform
@@ -409,6 +499,7 @@ const galeriaItems = galeriaItemsRaw.sort((a, b) => a.id - b.id);
           item.style.transform = ''; // Limpar transform individual
           visibleItems.push({item, originalIndex, visibleIndex});
           visibleIndex++;
+          shown++;
         } else {
           // Item oculto
           item.classList.add('hidden');
@@ -448,6 +539,25 @@ const galeriaItems = galeriaItemsRaw.sort((a, b) => a.id - b.id);
       console.log(`🔍 Filtro '${filter}': ${totalSlides} itens visíveis`);
       
       return visibleItems;
+    }
+
+    function maybeLoadMoreMobile() {
+      const totalInFilter = getTotalMobileItemsInFilter(currentFilter);
+      if (mobileVisibleLimit >= totalInFilter) return false;
+
+      mobileVisibleLimit += MOBILE_STEP;
+      updateVisibleItems(currentFilter);
+      updateDots();
+      return true;
+    }
+
+    function maybePrefetchMoreMobile() {
+      // Pré-carrega quando estiver chegando no fim (ex.: faltando 2 slides)
+      const PREFETCH_THRESHOLD = 2;
+      if (totalSlides <= 0) return;
+      if (currentSlide >= totalSlides - 1 - PREFETCH_THRESHOLD) {
+        maybeLoadMoreMobile();
+      }
     }
     
     // Função para atualizar as bolinhas (apenas itens visíveis)
@@ -520,6 +630,13 @@ const galeriaItems = galeriaItemsRaw.sort((a, b) => a.id - b.id);
           if (diffX > 0 && currentSlide < visibleItemsCount - 1) {
             // Swipe para esquerda - próximo slide visível
             goToSlide(currentSlide + 1);
+            maybePrefetchMoreMobile();
+          } else if (diffX > 0 && currentSlide >= visibleItemsCount - 1) {
+            // Chegou no fim: carregar mais automaticamente e continuar o swipe
+            const loaded = maybeLoadMoreMobile();
+            if (loaded) {
+              goToSlide(currentSlide + 1);
+            }
           } else if (diffX < 0 && currentSlide > 0) {
             // Swipe para direita - slide anterior visível
             goToSlide(currentSlide - 1);
@@ -540,19 +657,14 @@ const galeriaItems = galeriaItemsRaw.sort((a, b) => a.id - b.id);
         
         const filter = button.getAttribute('data-filter');
         if (!filter) return;
+        currentFilter = filter;
+        desktopVisibleLimit = DESKTOP_STEP;
+        mobileVisibleLimit = MOBILE_STEP;
         
-        // Filtrar itens desktop (grid)
-        galeriaItemsDesktop.forEach(item => {
-          const itemTipo = item.getAttribute('data-tipo');
-          
-          if (filter === 'todos' || filter === itemTipo) {
-            item.classList.remove('hidden');
-          } else {
-            item.classList.add('hidden');
-          }
-        });
+        // Desktop: aplicar filtro + limite
+        applyLimitToDesktop(filter);
 
-        // Filtrar itens mobile (carrossel) e atualizar bolinhas
+        // Mobile: filtrar itens (por demanda) e atualizar bolinhas
         updateVisibleItems(filter);
 
         // Reset para o primeiro slide visível
@@ -561,6 +673,7 @@ const galeriaItems = galeriaItemsRaw.sort((a, b) => a.id - b.id);
           carousel.style.transform = 'translateX(0%)';
         }
         updateDots();
+        updateCarregarMaisButton();
         
         console.log(`✅ Filtro '${filter}' aplicado - resetado para slide 0`);
       });
@@ -573,7 +686,12 @@ const galeriaItems = galeriaItemsRaw.sort((a, b) => a.id - b.id);
     }
     
     // Inicializar com todos os itens visíveis
+    currentFilter = 'todos';
+    desktopVisibleLimit = DESKTOP_STEP;
+    mobileVisibleLimit = MOBILE_STEP;
+    applyLimitToDesktop('todos');
     updateVisibleItems('todos');
+    updateCarregarMaisButton();
     
     console.log('✅ Carrossel inicializado no slide 0 (ID 1) - primeira bolinha ativa');
     
@@ -720,10 +838,12 @@ const galeriaItems = galeriaItemsRaw.sort((a, b) => a.id - b.id);
       }
     });
 
-    // Botão "Ver galeria completa"
-    if (verGaleriaBtn) {
-      verGaleriaBtn.addEventListener('click', () => {
-        alert('A galeria completa estará disponível em breve! =)');
+    // Botão "Carregar mais"
+    if (carregarMaisBtn) {
+      carregarMaisBtn.addEventListener('click', () => {
+        desktopVisibleLimit += DESKTOP_STEP;
+        applyLimitToDesktop(currentFilter);
+        updateCarregarMaisButton();
       });
     }
   });
